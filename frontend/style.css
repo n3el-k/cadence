@@ -110,6 +110,11 @@ textarea:focus {
   margin-top: 12px;
 }
 
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chips[hidden] { display: none; }
+.chip { font-size: 12px; padding: 6px 12px; border-radius: 10px; color: var(--muted); text-align: left; line-height: 1.4; }
+.mode-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
 .mode { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
 .mode input { accent-color: var(--text); cursor: pointer; }
 .mode label { margin-right: 12px; cursor: pointer; }
@@ -130,6 +135,16 @@ button:active { transform: translateY(0.5px); }
 button:disabled { opacity: 0.6; cursor: wait; }
 button.primary { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
 button.primary:hover { opacity: 0.88; }
+
+/* destructive reset button */
+#clear-btn {
+  margin-top: 18px;
+  font-size: 13px;
+  padding: 5px 12px;
+  color: var(--danger);
+  background: transparent;
+}
+#clear-btn:hover { background: color-mix(in srgb, var(--danger) 8%, transparent); border-color: var(--danger); }
 
 /* pending / conflict card */
 .pending {

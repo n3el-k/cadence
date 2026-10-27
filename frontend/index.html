@@ -26,6 +26,8 @@
       <section class="card">
         <label class="label" for="text-area">Add or change an event</label>
         <textarea id="text-area" rows="3" placeholder="Dinner with Sam on Friday at 7pm"></textarea>
+        <p id="mode-note" class="mode-note"></p>
+        <div id="chips" class="chips" hidden></div>
 
         <div class="row">
           <div class="mode">
@@ -37,7 +39,7 @@
           <button id="send-btn" class="primary">Send</button>
         </div>
       </section>
-
+      <button id="clear-btn">Clear Events</button>
       <section id="agent-output" class="card" hidden></section>
     </aside>
   </main>
