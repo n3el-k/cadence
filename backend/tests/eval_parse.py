@@ -1,19 +1,13 @@
 import argparse
-import tempfile
-from pathlib import Path
-from app import config  # noqa: F401  (loads .env)
 from datetime import datetime, date
 import time
 
 from instructor.core.exceptions import InstructorRetryException 
 
 from app.llm.parse import parse_command
-from app import db, store
 from app.models import Event
 from app.date_utils import Weekdays, next_weekday
-
-# Fixed session id: the eval runs against a temp DB as a single fake visitor
-EVAL_SESSION = "eval-session"
+from tests.eval_utils import EVAL_SESSION, use_temp_db, seed_events
 
 # 3 Goals:
 # Test add, test remove, test correct date arithmetic
@@ -95,15 +89,6 @@ remove_prompts: dict[str, str | None] = {
     "Remove my flight next week": "flight1",
     "Cancel the meeting with my professor": None,
 }
-
-def use_temp_db():
-    db.DB_PATH = Path(tempfile.mkdtemp()) / "eval.db"
-    db.init_db()
-
-def seed_events(events: dict[str, Event]):
-    store.clear_store(EVAL_SESSION)
-    for event_id, event in events.items():
-        store.insert_event(EVAL_SESSION, event, event_id)
 
 def eval_remove():
     print("\nTEST REMOVE:\n")
