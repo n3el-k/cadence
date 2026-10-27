@@ -4,7 +4,7 @@ Type a sentence, get a calendar event. "Dinner with Alex Friday at 7" adds it, "
 
 **Live demo:** [https://cadence-cal.fly.dev]
 
-<!-- TODO: screenshot or GIF of the frontend -->
+![Cadence demo](docs/demo.gif)
 
 ## What it does
 
@@ -33,6 +33,20 @@ Design choices worth knowing:
 - **Hand-written agent loop.** The agent uses the Anthropic SDK directly with four tools. Tool inputs are validated with the same Pydantic models, and validation errors go back to the model as `is_error` tool results so it can correct itself. The session id is never part of a tool schema; the endpoint supplies it, so the model cannot reach another visitor's data.
 - **The model does not do date math.** The prompt contains a lookup table of the next 7 days, and the model copies dates from it.
 - **Hold, don't write.** Conflicting changes are stored as one pending action per session. Confirm (`POST /pending/confirm`) writes exactly what the user saw.
+
+## Problems I ran into
+
+**Date arithmetic in quick mode.** My first prompt just gave the model today's date and let it work out "Friday" or "next Tuesday". It got these wrong often enough to be unusable, and tweaking the wording only moved the failures around. The fix was to stop asking the model to calculate. `generate_next_n_days` builds a lookup table of the next 7 days and the prompt tells the model to copy the date for the weekday it sees. That raised its own edge case: if today is Friday, what does "Friday" mean? The table maps it to next week, and "today" or "tonight" are the only words that mean today. Because the date logic was now plain Python, I could test it, and this is what led to my first pytest file (`tests/test_date_utils.py`). It covers the same-weekday rule and a week that crosses a year boundary, which I would never have caught by trying prompts by hand.
+
+**Ollama was too slow.** I started with a local model (`qwen2.5:7b` through Ollama) so the project would cost nothing to run. On my laptop each request took long enough that quick mode felt broken, and iterating on prompts meant waiting after every change. I switched to the Anthropic SDK with Claude Haiku, which made quick mode fast enough to feel instant and made it practical to build the agent loop on top. The provider factory (`llm/providers.py`) is still there, so Ollama works for quick mode, but agent mode needs the Anthropic tool-use API.
+
+**Times without am/pm.** "Lunch at 1" is 13:00 and "breakfast at 8" is 08:00, but the model would sometimes pick the wrong half of the day. A blanket rule did not help, so the prompt now says to choose the more likely one for that kind of event and gives those two cases as examples. These became their own eval suite (Quick: times).
+
+**Same-title events.** With two events called "standup", the model would pick the wrong one or the wrong id for "move the second standup". Two changes fixed it: `format_for_prompt` now lists the date first so events with the same title are easy to tell apart, and the prompt says to only pick an event whose title matches and to return `event_id: null` rather than guess. The instructor validator also rejects any id that is not in the visitor's calendar.
+
+**Learning to prompt with examples.** My first prompts were pure instructions: a list of rules and nothing else. When the model got an update wrong (it filled in every field instead of only the changed ones), adding more rules made the prompt longer without fixing it. What worked was showing one concrete example next to the rule: "move dentist to Friday 3pm" is an update with the dentist's id, only `start_day_time` set, and everything else null. The same pattern fixed the am/pm cases. I learned that a rule says what I want, an example shows the exact output shape, and a short example often beats a paragraph of rules. I also learned to keep the number of examples small, since the model copies them closely and I did not want it to pattern-match on the wording of one.
+
+**An eval failure that was my test's fault.** One early agent case had a "dentist" event and a "teeth cleaning" event, and I asked the agent to act on the dentist. It did not change anything. It stopped and asked me which event I meant. My eval counted that as a failure, but when I read the trace the agent was right: the request really could mean either one, and the agent prompt tells it to ask when several events plausibly match instead of picking one. I decided to keep that behavior and fix the test, not loosen the prompt to make the agent guess. The ambiguous cases ("Cancel the standup" with two standups) now expect the calendar to stay unchanged, and I reworded the other cases so each has one clear answer. The lesson was that when an eval fails, I should check whether the test or the model is wrong before changing the prompt. Changing the prompt to pass a bad test would have made the agent worse for real users.
 
 ## Evaluation
 
