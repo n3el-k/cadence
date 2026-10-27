@@ -21,7 +21,7 @@ from app.llm.agent.loop import run_agent
 from app.models import PendingAction, AgentResponse
 
 # Setup app
-app = FastAPI()
+app = FastAPI(title="Cadence")
 
 # Setup db
 init_db()
@@ -40,7 +40,7 @@ def get_session_id(request: Request, response: Response) -> str:
     sid = request.cookies.get('session_id')
     if not sid or len(sid) != 32: 
         sid = secrets.token_hex(16) # 1 byte is 2 hex characters
-    response.set_cookie('session_id', sid, httponly=True, samesite="lax", max_age=604800) # max_age = 7days
+    response.set_cookie('session_id', sid, httponly=True, samesite="lax", max_age=604800, secure=True) # max_age = 7days
     store.touch_session(sid)
     return sid
 

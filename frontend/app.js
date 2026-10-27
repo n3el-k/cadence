@@ -18,7 +18,7 @@ const calendar = new FullCalendar.Calendar(document.getElementById("calendar"),
             }
         },
         events: fetchEvents
-    })
+    }) 
 calendar.render()
 
 async function fetchEvents() {
@@ -130,7 +130,7 @@ function renderAgentOutput(data) {
 
     const list = document.createElement("ul")
     for (const action of data["actions"]) {
-
+        
         const item = document.createElement("li")
         if (action.is_error === true) {
             item.textContent = "ERROR: " + action.tool + ": " + JSON.stringify(action.input)

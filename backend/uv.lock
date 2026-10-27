@@ -12,7 +12,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ai-calendar-service"
+name = "cadence"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
