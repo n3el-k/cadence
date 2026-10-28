@@ -2,7 +2,7 @@
 
 Type a sentence, get a calendar event. "Dinner with Alex Friday at 7" adds it, "move both standups to 10am" finds and updates two events, and overlapping events are held for you to confirm instead of silently saved.
 
-**Live demo:** [https://cadence-cal.fly.dev]
+**Live demo:** [https://cadence-cal.fly.dev](https://cadence-cal.fly.dev)
 
 ![Cadence demo](docs/demo.gif)
 
